@@ -1,62 +1,78 @@
 import React, { useEffect, useState, useRef } from "react";
-import * as Battery from 'expo-battery';
-import { startActivityAsync, ActivityAction } from 'expo-intent-launcher';
-import { Modal, StyleSheet, Text, AppState, View, TouchableOpacity } from 'react-native';
+import * as Battery from "expo-battery";
+import { startActivityAsync, ActivityAction } from "expo-intent-launcher";
+import {
+  Modal,
+  StyleSheet,
+  Text,
+  AppState,
+  View,
+  TouchableOpacity,
+} from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import NoConnection from "./component/NoConnection";
 
 export default function Check({ children }) {
-    const [modalVisible, setModalVisible] = useState(false);
-    const [netWorkState, setNetWorkState] = useState(false);
-    const appState = useRef(AppState.currentState);
-    const [appStateVisible, setAppStateVisible] = useState(appState.current);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [netWorkState, setNetWorkState] = useState(false);
+  const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
 
-    useEffect(() => {
-        checkBatteryOptimization()
-    }, [])
+  useEffect(() => {
+    checkBatteryOptimization();
+  }, []);
 
-    useEffect(() => {
-        const subscription = NetInfo.addEventListener(state => {
-            setNetWorkState(state.isInternetReachable);
-        });
-        return () => {
-            subscription();
-        };
-    }, [netWorkState]);
-
-    useEffect(() => {
-        const subscription = AppState.addEventListener("change", _handleAppStateChange);
-        return () => {
-            subscription.remove();
-        };
-    }, [appState]);
-
-    const _handleAppStateChange = nextAppState => {
-        if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-            checkBatteryOptimization();
-        }
-        appState.current = nextAppState;
-        setAppStateVisible(appState.current);
+  useEffect(() => {
+    const subscription = NetInfo.addEventListener((state) => {
+      setNetWorkState(state.isInternetReachable);
+    });
+    return () => {
+      subscription();
     };
+  }, [netWorkState]);
 
-    const checkBatteryOptimization = async () => {
-        let result = await Battery.isBatteryOptimizationEnabledAsync();
-        if (result) {
-            setModalVisible(true); return;
-        }
-        setModalVisible(false);
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      _handleAppStateChange
+    );
+    return () => {
+      subscription.remove();
+    };
+  }, [appState]);
+
+  const _handleAppStateChange = (nextAppState) => {
+    if (
+      appState.current.match(/inactive|background/) &&
+      nextAppState === "active"
+    ) {
+      checkBatteryOptimization();
     }
+    appState.current = nextAppState;
+    setAppStateVisible(appState.current);
+  };
 
-    const tryToGotoBatteryOptimization = async () => {
-        const resultof = await startActivityAsync(ActivityAction.APPLICATION_SETTINGS);
+  const checkBatteryOptimization = async () => {
+    let result = await Battery.isBatteryOptimizationEnabledAsync();
+    if (result) {
+      setModalVisible(true);
+      return;
     }
+    setModalVisible(false);
+  };
 
-    return (
-        <View style={{ flex: 1 }}>
-            {netWorkState ? (
-                <View style={styles.centeredView}>
-                    {children}
-                    {/* <Modal
+  const tryToGotoBatteryOptimization = async () => {
+    const resultof = await startActivityAsync(
+      ActivityAction.APPLICATION_SETTINGS
+    );
+  };
+
+  return (
+    <View style={{ flex: 1 }}>
+      {/* {netWorkState ? ( */}
+      <View style={styles.centeredView}>
+        {children}
+        {/* <Modal
                         animationType="slide"
                         transparent={true}
                         visible={modalVisible}>
@@ -96,77 +112,77 @@ export default function Check({ children }) {
                             </View>
                         </View>
                     </Modal> */}
-                </View>
-            ) : (
-                <NoConnection netWorkState={netWorkState} />
-            )}
-        </View>
-    );
-
+      </View>
+      {/* ) : (
+        // null
+         <NoConnection netWorkState={netWorkState} />
+      )} */}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center'
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    modalView: {
-        margin: 20,
-        backgroundColor: 'white',
-        borderRadius: 10,
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2,
-    },
-    buttonOpen: {
-        backgroundColor: '#F194FF',
-    },
-    buttonClose: {
-        backgroundColor: '#2196F3',
-    },
-    textStyle: {
-        color: 'white',
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    modalText: {
-        marginBottom: 15,
-        textAlign: 'center',
-    },
-    headingBackground: {
-        alignItems: 'center'
-    },
-    heading: {
-        fontSize: 30,
-        fontWeight: 'bold'
-    },
-    body: {
-        marginVertical: 10
-    },
-    bodyText: {
-        fontSize: 16,
-        textAlign: 'justify'
-    },
-    buttonStyle: {
-        width: '45%',
-        borderRadius: 3,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    buttonTextColor: {
-        color: '#fff'
-    }
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonOpen: {
+    backgroundColor: "#F194FF",
+  },
+  buttonClose: {
+    backgroundColor: "#2196F3",
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  headingBackground: {
+    alignItems: "center",
+  },
+  heading: {
+    fontSize: 30,
+    fontWeight: "bold",
+  },
+  body: {
+    marginVertical: 10,
+  },
+  bodyText: {
+    fontSize: 16,
+    textAlign: "justify",
+  },
+  buttonStyle: {
+    width: "45%",
+    borderRadius: 3,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonTextColor: {
+    color: "#fff",
+  },
 });
